@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 import { setContext, onMount, onDestroy } from "svelte";
 import { writable } from "svelte/store";
 import Card from "./Card.svelte";
@@ -15,20 +17,24 @@ const MAX_CARD_WIDTH = 100;
 const N_TABLEAU_COLUMNS = 7;
 const CARD_ASPECT_RATIO = 1.4;
 
-$: canvasWidth = Math.min(MAX_CANVAS_WIDTH, $size.width);
-$: columnSpacing = (canvasWidth - MAX_CARD_WIDTH * (N_TABLEAU_COLUMNS)) / (N_TABLEAU_COLUMNS - 1);
-$: cardWidth = Math.min(MAX_CARD_WIDTH, canvasWidth/7);
-$: cardHeight = cardWidth * CARD_ASPECT_RATIO;
+let canvasWidth = $derived(Math.min(MAX_CANVAS_WIDTH, $size.width));
+let columnSpacing = $derived((canvasWidth - MAX_CARD_WIDTH * (N_TABLEAU_COLUMNS)) / (N_TABLEAU_COLUMNS - 1));
+let cardWidth = $derived(Math.min(MAX_CARD_WIDTH, canvasWidth/7));
+let cardHeight = $derived(cardWidth * CARD_ASPECT_RATIO);
 
-$: setContext('cardWidth', cardWidth);
-$: setContext('cardHeight', cardHeight);
+run(() => {
+    setContext('cardWidth', cardWidth);
+  });
+run(() => {
+    setContext('cardHeight', cardHeight);
+  });
 
 const store = createCards();
 setContext('store', store);
 
-let canvasRef: HTMLDivElement;
-let tableauRef: HTMLDivElement;
-let foundationRef: HTMLDivElement;
+let canvasRef: HTMLDivElement = $state();
+let tableauRef: HTMLDivElement = $state();
+let foundationRef: HTMLDivElement = $state();
 
 const isCardStartedDragging = writable(null);
 const draggingSession = writable(null);
@@ -42,9 +48,9 @@ setContext('hoveredPile', hoveredPile);
 setContext('draggingSession', draggingSession);
 setContext('pointerEvent', pointerEvent);
 
-$: canvasRect = canvasRef && canvasRef.getBoundingClientRect();
-$: foundationRect = foundationRef && foundationRef.getBoundingClientRect();
-$: tableauRect = tableauRef && tableauRef.getBoundingClientRect();
+let canvasRect = $derived(canvasRef && canvasRef.getBoundingClientRect());
+let foundationRect = $derived(foundationRef && foundationRef.getBoundingClientRect());
+let tableauRect = $derived(tableauRef && tableauRef.getBoundingClientRect());
 
 function handlePointerMove(e: PointerEvent) {
 
@@ -113,7 +119,7 @@ function handlePointerUp(e: PointerEvent) {
   draggingSession.set(null);
 }
 
-$: {
+run(() => {
   if ($isCardStartedDragging !== null) {
     const pileType = $isCardStartedDragging.pile.type;
     if (pileType === "tableau") {
@@ -126,9 +132,9 @@ $: {
       draggingSession.set([$isCardStartedDragging])
     }
   }
-}
+});
 
-$: draggingStyles = $pointerEvent !== null ? `
+let draggingStyles = $derived($pointerEvent !== null ? `
   top: 0;
   left: 0;
 	position: absolute;
@@ -136,11 +142,11 @@ $: draggingStyles = $pointerEvent !== null ? `
 	box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
 	z-index: 1000;
 	pointer-events: none;
-`: '';
+`: '');
 
 </script>
 
-<div class="bg-green-600 h-screen w-screen overflow-hidden flex justify-center" on:pointermove={handlePointerMove} on:pointerup={handlePointerUp}>
+<div class="bg-green-600 h-screen w-screen overflow-hidden flex justify-center" onpointermove={handlePointerMove} onpointerup={handlePointerUp}>
   <div
     bind:this={canvasRef}
     class="flex flex-col h-screen"
@@ -151,7 +157,7 @@ $: draggingStyles = $pointerEvent !== null ? `
       <FoundationPile index={1} />
       <FoundationPile index={2} />
       <FoundationPile index={3} />
-      <div />
+      <div></div>
       <WastePile />
       <StockPile />
     </div>

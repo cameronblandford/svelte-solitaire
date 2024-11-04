@@ -3,18 +3,22 @@
   import BackCard from './BackCard.svelte';
 import type { CardType, StoreProps } from './store';
 
-export let card: CardType;
-export let hidden: boolean = false;
-export let isTopPileOpenCard: boolean = true;
+	interface Props {
+		card: CardType;
+		hidden?: boolean;
+		isTopPileOpenCard?: boolean;
+	}
 
-$: isRed = card.suit === '♦️' || card.suit === '♥️';
+	let { card, hidden = false, isTopPileOpenCard = true }: Props = $props();
 
-$: classNames = [
+let isRed = $derived(card.suit === '♦️' || card.suit === '♥️');
+
+let classNames = $derived([
 	'relative',
 	'text-3xl',
 	card.isFaceDown ? 'pointer-events-none': 'pointer-events-auto',
 	card.isFaceDown ? 'cursor-auto': 'cursor-pointer',
-];
+]);
 
 const store = getContext<StoreProps>('store');
 const isCardStartedDragging: any = getContext('isCardStartedDragging');
@@ -44,9 +48,9 @@ function handlePointerDown(e: PointerEvent) {
 const cardWidth = getContext('cardWidth');
 const cardHeight = getContext('cardHeight');
 
-$: opacity = hidden ? '0' : '1';
+let opacity = $derived(hidden ? '0' : '1');
 
-$: contentClass = `
+let contentClass = $derived(`
 	w-full
 	h-full
 	relative
@@ -64,12 +68,12 @@ $: contentClass = `
 	rounded-md
 	border
 	border-black
-`
+`)
 </script>
 
 <div
-	on:pointerdown={handlePointerDown}
-	on:dblclick={handleDoubleClick}
+	onpointerdown={handlePointerDown}
+	ondblclick={handleDoubleClick}
 	class={classNames.join(' ')}
 	style:opacity
 	style:width="{cardWidth}px"

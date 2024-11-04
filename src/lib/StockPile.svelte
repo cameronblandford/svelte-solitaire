@@ -7,7 +7,7 @@ import { isCardInPile, type CardType } from "./store";
 
 const store = getContext('store');
 
-$: cards = $store.filter((card: CardType) => isCardInPile(card, { type: "stock" }));
+let cards = $derived($store.filter((card: CardType) => isCardInPile(card, { type: "stock" })));
 
 function handleClick() {
   store.pushToWastePileFromStockPile();
@@ -15,7 +15,7 @@ function handleClick() {
 
 </script>
 
-<div class="relative cursor-pointer" on:click={handleClick} aria-hidden="true">
+<div class="relative cursor-pointer" onclick={handleClick} aria-hidden="true">
   {#if cards.length > 0}
     <BackCard>{cards.length}</BackCard>
   {/if}

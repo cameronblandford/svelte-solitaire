@@ -4,10 +4,14 @@
   import NoCardPile from './NoCardPile.svelte';
   import { isCardInFoudnationPileOfIndex, isCardInPile, SUITS, type CardPile, type CardType, type StoreProps } from './store';
   
-  export let index: number;
+  interface Props {
+    index: number;
+  }
+
+  let { index }: Props = $props();
   
   const store = getContext<StoreProps>('store');
-  $: cards = $store.filter(card => isCardInFoudnationPileOfIndex(card, index));
+  let cards = $derived($store.filter(card => isCardInFoudnationPileOfIndex(card, index)));
 
   const draggingSession = getContext('draggingSession');
   

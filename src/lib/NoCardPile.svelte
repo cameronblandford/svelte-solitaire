@@ -1,7 +1,12 @@
 <script lang="ts">
 import { getContext } from "svelte";
 
-export let bg: string = '';
+	interface Props {
+		bg?: string;
+		children?: import('svelte').Snippet;
+	}
+
+	let { bg = '', children }: Props = $props();
 
 const classNames = [
 	'position',
@@ -27,5 +32,5 @@ const cardHeight = getContext('cardHeight');
 	style:width="{cardWidth}px"
 	style:height="{cardHeight}px"
 	class={classNames.join(' ')}>
-	<slot />
+	{@render children?.()}
 </div>

@@ -6,7 +6,7 @@ import { isCardInPile, isCardInWastePile, type CardType } from "./store";
 
 const store = getContext('store');
 
-$: cards = $store.filter(isCardInWastePile).slice(0, 2).reverse();
+let cards = $derived($store.filter(isCardInWastePile).slice(0, 2).reverse());
 
 const draggingSession = getContext('draggingSession');
 
